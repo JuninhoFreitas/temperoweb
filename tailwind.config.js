@@ -1,21 +1,25 @@
 import defaultTheme from "tailwindcss/defaultTheme";
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./components/**/*.{js,vue,ts}",
-    "./layouts/**/*.vue",
-    "./pages/**/*.vue",
-    "./pages/*.vue",
-    "./plugins/**/*.{js,ts}",
-    "./app.vue",
-    "./error.vue",
-  ],
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ["Inter", ...defaultTheme.fontFamily.sans],
-      },
+	content: [
+		"./components/**/*.{js,vue,ts}",
+		"./layouts/**/*.vue",
+		"./pages/**/*.vue",
+		"./pages/*.vue",
+		"./plugins/**/*.{js,ts}",
+		"./app.vue",
+		"./error.vue",
+	],
+	theme: {
+		screens: {
+      'xss': {'max': '475px'},
+      ...defaultTheme.screens,
     },
-  },
-  plugins: [require("@tailwindcss/typography")]
+		extend: {
+			fontFamily: {
+				sans: ["Inter", ...defaultTheme.fontFamily.sans],
+			},
+		},
+	},
+	plugins: [require("@tailwindcss/typography")],
 };
