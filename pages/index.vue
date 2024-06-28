@@ -1,6 +1,6 @@
 <template>
   <div class="flex lg:flex-row lg:justify-center lg:h-[90vh] lg:my-8 sm:my-0 sm:h-[100vh] xss:flex-col xss:gap-5">
-    <div class=" flex w-[50vh] h-[93vh] shadow-2xl sm:h-[100vh] sm:w-[100vh] xss:w-[100vw]">
+    <div class=" flex w-[50vh] h-[85vh] shadow-2xl sm:h-[100vh] sm:w-[100vh] xss:w-[100vw]">
       <Panel header="Items" class="overflow-scroll flex flex-col w-[50vh] sm:w-[100vh]" id="listOfItemsPanel">
         <div v-for="category in listofitems" :key="category.id">
           <h2 class="text-xl dark:text-white text-black">
@@ -23,7 +23,7 @@
           <div v-for="item in missingItems" :key="item.id" 
             class="shadow-sm backdrop-blur-none mb-2 shadow-smp-2 flex-row">
             <div class="flex flex-row justify-between">
-              <span class="sm:text-sm sm:text-balance text-slate-950">{{ item.name }} </span>
+              <span class="sm:text-sm sm:text-balance text-slate-950 xss:text-sm xss:text-wrap">{{ item.name }} </span>
               <div class="flex flex-row">
                 <Button class="bg-red-600 w-8 h-8 text-nowrap text-base ml-1 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, -6)"
                   label="- 6" />
