@@ -4,10 +4,10 @@
       <Panel header="Items" class="overflow-scroll flex flex-col w-[50vh] sm:w-[100vh]" id="listOfItemsPanel">
         <div v-for="category in listofitems" :key="category.id">
           <h2 class="text-xl dark:text-white text-black">
-            {{ category.category_name }}
+            {{ category.category_name == 'Customizado' ? '' : category.category_name }}
           </h2>
 
-          <div v-for="item in category.items" @click="addItem(item)" :key="item.id"
+          <div v-for="item in category.items" @click="addItem(item, category.category_name)" :key="item.id"
             class="mt-5 hover:bg-gray-100 p-2 cursor-pointer bg-white shadow-sm ">
             <span>{{ item.name }}</span>
           </div>
@@ -16,26 +16,32 @@
     </div>
     <div>
       <div class="overflow-scroll h-[93vh] sm:h-[100vh]">
-        <!-- When using in mobile, this panel should be hidden until some item is clicked,
-        and then it should be displayed in a modal, and the user should be able to close it by clicking outside the modal
+        <!-- 
+          It should divide by category
         -->
         <Panel id="missingItemsModal" v-model:visible="showMissingItemsModal">
-          <div v-for="item in missingItems" :key="item.id" 
-            class="shadow-sm backdrop-blur-none mb-2 shadow-smp-2 flex-row">
-            <div class="flex flex-row justify-between">
-              <span class="sm:text-sm sm:text-balance text-slate-950 xss:text-sm xss:text-wrap">{{ item.name }} </span>
-              <div class="flex flex-row">
-                <Button class="bg-red-600 w-8 h-8 text-nowrap text-base ml-1 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, -6)"
-                  label="- 6" />
-                <Button class="bg-red-600 w-8 h-8 text-nowrap text-base ml-1 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, -1)"
-                  label="- 1" />
-                <InputNumber inputClass="w-12 mx-auto text-center p-0" class="ml-2" v-model="item.quantity" />
-                <Button class="bg-green-600 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 1)"
-                  label="+ 1" />
-                <Button class="bg-green-600 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 6)"
-                  label="+ 6" />
-                <Button icon="pi pi-trash" class="ml-2 w-8 h-8 text-nowrap text-base bg-black sm:w-4 sm:h-4"
-                  @click="removeItem(item.id)" />
+          <div v-for="category in listofitems" :key="category.id">
+            <h2 class="text-xl dark:text-white text-black">
+              {{ category.category_name }}
+            </h2>
+            <div v-for="item in missingItems.filter(i => i.category === category.category_name)" :key="item.id" 
+              class="shadow-sm backdrop-blur-none mb-2 shadow-smp-2 flex-row">
+              <div class="flex flex-row justify-between">
+                <span class="sm:text-sm sm:text-balance text-slate-950 xss:text-sm xss:text-wrap">{{ item.name }} </span>
+
+                <div class="flex flex-row">
+                  <Button class="bg-red-600 w-8 h-8 text-nowrap text-base ml-1 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, -6)"
+                    label="- 6" />
+                  <Button class="bg-red-600 w-8 h-8 text-nowrap text-base ml-1 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, -1)"
+                    label="- 1" />
+                  <InputNumber inputClass="w-12 mx-auto text-center p-0" class="ml-2" v-model="item.quantity" />
+                  <Button class="bg-green-600 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 1)"
+                    label="+ 1" />
+                  <Button class="bg-green-600 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 6)"
+                    label="+ 6" />
+                  <Button icon="pi pi-trash" class="ml-2 w-8 h-8 text-nowrap text-base bg-black sm:w-4 sm:h-4"
+                    @click="removeItem(item.id)" />
+                </div>
               </div>
             </div>
           </div>
@@ -59,14 +65,14 @@
 import { ref } from 'vue'
 import items from '~/database/items.js' // Importing items from a JSON file
 
-const listofitems = items
+const listofitems = [...items, { category_name: 'Customizado', items: [] }]
 const showMissingItemsModal = ref(false)
 const missingItems = ref([])
 const newItemName = ref('')
 const newItemObservation = ref('')
 
 
-const addItem = (item) => {
+const addItem = (item, category) => {
   if (!showMissingItemsModal.value) {
     showMissingItemsModal.value = true
   }
@@ -74,14 +80,14 @@ const addItem = (item) => {
   if (existingItem) {
     existingItem.quantity += 1
   } else {
-    missingItems.value.push({ ...item, quantity: 1 })
+    missingItems.value.push({ ...item, quantity: 1, category })
   }
   newItemName.value = '' // Clear input after adding
 }
 
 const addItemByName = (name) => {
   const item = { id: Date.now(), name, quantity: 1 } // Simplified item creation
-  addItem(item)
+  addItem(item, 'Customizado')
 }
 
 const changeItemQuantity = (id, change) => {
@@ -105,24 +111,30 @@ const submitMissingItems = async () => {
     NATURAIS: [],
     MOLHOS: [],
     SAIS: [],
-    TAGS: []
+    TAGS: [],
+    CUSTOMIZADO: []
   }
 
   // Organizar os itens por categoria
+  // example of item: {id: '01fc3f66-6178-4f31-9c51-d041e263a1d4', name: 'Colorau 90g', quantity: 13, category: 'Alimentos'}
+
   missingItems.value.forEach(item => {
+    console.log(item)
     const foodName = item.name
     const itemCount = item.quantity
+    const category = item.category
 
     // Determinar a categoria do item adicionado
-    if (foodName.startsWith('Molho')) {
-      categorizedItems.MOLHOS.push({ name: foodName, count: itemCount })
-    } else if (foodName.startsWith('Sal')) {
-      categorizedItems.SAIS.push({ name: foodName, count: itemCount })
-    } else if (foodName.startsWith('Tag')) {
-      categorizedItems.TAGS.push({ name: foodName, count: itemCount })
-    } else {
-      categorizedItems.NATURAIS.push({ name: foodName, count: itemCount })
-    }
+    const categoryMap = {
+      'Alimentos': 'NATURAIS',
+      'Molhos': 'MOLHOS',
+      'Sais': 'SAIS',
+      'Tags': 'TAGS',
+      'Customizado': 'CUSTOMIZADO'
+    };
+
+    const categoryKey = categoryMap[category] || 'CUSTOMIZADO';
+    categorizedItems[categoryKey].push({ name: foodName, count: itemCount });
   })
 
   // Ordenar os itens dentro de cada categoria por nome
@@ -131,15 +143,13 @@ const submitMissingItems = async () => {
   })
 
   // Construir o conteúdo do email categorizado
-  let emailContent = ''
-  ;['NATURAIS', 'MOLHOS', 'SAIS', 'TAGS'].forEach(category => {
-    if (categorizedItems[category].length > 0) {
-      emailContent += `\n${category}:\n`
-      categorizedItems[category].forEach(item => {
-        emailContent += `${item.name}: ${item.count}\n`
-      })
-    }
-  })
+  let emailContent = Object.entries(categorizedItems)
+    .filter(([, items]) => items.length > 0)
+    .map(([category, items]) => {
+      const itemsContent = items.map(item => `${item.name}: ${item.count}`).join('\n')
+      return `\n${category}:\n${itemsContent}`
+    })
+    .join('')
 
   // Adicionar observação se houver
   if (observation.trim() !== '') {
