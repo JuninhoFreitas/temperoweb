@@ -1,12 +1,18 @@
 <template>
+  <!-- Estrutura principal da página, usando classes do Tailwind para estilização responsiva -->
   <div class="flex lg:flex-row lg:justify-center lg:h-[90vh] lg:my-8 sm:my-0 sm:h-[100vh] xss:flex-col xss:gap-5">
+    <!-- Painel da lista de itens -->
     <div class=" flex w-[50vh] h-[85vh] shadow-2xl sm:h-[100vh] sm:w-[100vh] xss:w-[100vw]">
+      <!-- Componente Panel com cabeçalho "Items" e rolagem -->
       <Panel header="Items" class="overflow-scroll flex flex-col w-[50vh] sm:w-[100vh]" id="listOfItemsPanel">
+        <!-- Loop para exibir categorias de itens -->
         <div v-for="category in listofitems" :key="category.id">
+          <!-- Exibe o nome da categoria, exceto se for "Customizado" -->
           <h2 class="text-xl dark:text-white text-black">
             {{ category.category_name == 'Customizado' ? '' : category.category_name }}
           </h2>
 
+          <!-- Loop para exibir itens dentro de cada categoria -->
           <div v-for="item in category.items" @click="addItem(item, category.category_name)" :key="item.id"
             class="mt-5 hover:bg-gray-100 p-2 cursor-pointer bg-white shadow-sm ">
             <span>{{ item.name }}</span>
@@ -15,20 +21,22 @@
       </Panel>
     </div>
     <div>
+      <!-- Painel para exibir itens faltantes -->
       <div class="overflow-scroll h-[93vh] sm:h-[100vh]">
-        <!-- 
-          It should divide by category
-        -->
         <Panel id="missingItemsModal" v-model:visible="showMissingItemsModal">
+          <!-- Loop para exibir categorias de itens faltantes -->
           <div v-for="category in listofitems" :key="category.id">
+            <!-- Exibe o nome da categoria se houver itens faltantes -->
             <h2 class="text-xl dark:text-white text-black">
               {{ missingItems.filter(i => i.category === category.category_name).length > 0 ? category.category_name : '' }}
             </h2>
+            <!-- Loop para exibir itens faltantes dentro de cada categoria -->
             <div v-for="item in missingItems.filter(i => i.category === category.category_name)" :key="item.id" 
               class="shadow-sm backdrop-blur-none mb-2 shadow-smp-2 flex-row">
               <div class="flex flex-row justify-between">
                 <span class="sm:text-sm sm:text-balance text-slate-950 xss:text-sm xss:text-wrap">{{ item.name }} </span>
 
+                <!-- Botões para alterar a quantidade de itens -->
                 <div class="flex flex-row">
                   <Button class="bg-red-600 w-8 h-8 text-nowrap text-base ml-1 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, -6)"
                     label="- 6" />
@@ -45,14 +53,15 @@
               </div>
             </div>
           </div>
+          <!-- Campo para adicionar itens customizados -->
           <div class="flex flex-col gap-2">
             <div>
               <InputText v-model="newItemName" placeholder="Adicione um item customizado" class="w-[70%]" />
               <Button label="Add" @click="addItemByName(newItemName)" class="w-[20%] ml-3" />
             </div>
-            <!-- Criar um campo de Observaçes -->
+            <!-- Campo de observações -->
             <Textarea v-model="newItemObservation" placeholder="Observaçoes" />
-            <!-- Criar um botão para Enviar as informaçes -->
+            <!-- Botão para enviar as informações -->
             <Button label="Enviar" @click="submitMissingItems" class="w-[70%] bg-blue-600 ml-auto mr-auto" />
           </div>
         </Panel>
@@ -62,51 +71,57 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import items from '~/database/items.js' // Importing items from a JSON file
+import { ref } from 'vue' // Importa a função ref do Vue para criar referências reativas
+import items from '~/database/items.js' // Importa os itens de um arquivo JSON
 
+// Cria uma lista de itens, incluindo uma categoria customizada
 const listofitems = [...items, { category_name: 'Customizado', items: [] }]
-const showMissingItemsModal = ref(false)
-const missingItems = ref([])
-const newItemName = ref('')
-const newItemObservation = ref('')
+const showMissingItemsModal = ref(false) // Controle de visibilidade do modal de itens faltantes
+const missingItems = ref([]) // Lista de itens faltantes
+const newItemName = ref('') // Nome do novo item customizado
+const newItemObservation = ref('') // Observação do novo item
 
-
+// Função para adicionar um item à lista de itens faltantes
 const addItem = (item, category) => {
   if (!showMissingItemsModal.value) {
-    showMissingItemsModal.value = true
+    showMissingItemsModal.value = true // Abre o modal se estiver fechado
   }
   const existingItem = missingItems.value.find((i) => i.id === item.id)
   if (existingItem) {
-    existingItem.quantity += 1
+    existingItem.quantity += 1 // Incrementa a quantidade se o item já estiver na lista
   } else {
-    missingItems.value.push({ ...item, quantity: 1, category })
+    missingItems.value.push({ ...item, quantity: 1, category }) // Adiciona o item à lista com quantidade 1
   }
-  newItemName.value = '' // Clear input after adding
+  newItemName.value = '' // Limpa o campo de entrada após adicionar
 }
 
+// Função para adicionar um item customizado pelo nome
 const addItemByName = (name) => {
-  const item = { id: Date.now(), name, quantity: 1 } // Simplified item creation
-  addItem(item, 'Customizado')
+  const item = { id: Date.now(), name, quantity: 1 } // Cria um item simplificado
+  addItem(item, 'Customizado') // Adiciona o item à categoria customizada
 }
 
+// Função para alterar a quantidade de um item
 const changeItemQuantity = (id, change) => {
   const item = missingItems.value.find((i) => i.id === id)
   if (item) {
     item.quantity += change
     if (item.quantity <= 0) {
-      removeItem(id) // Remove item if quantity is 0 or less
+      removeItem(id) // Remove o item se a quantidade for 0 ou menor
     }
   }
 }
 
+// Função para remover um item da lista de itens faltantes
 const removeItem = (id) => {
   missingItems.value = missingItems.value.filter((i) => i.id !== id)
 }
 
+// Função para enviar os itens faltantes
 const submitMissingItems = async () => {
   const observation = newItemObservation.value
 
+  // Estrutura para categorizar os itens
   let categorizedItems = {
     NATURAIS: [],
     MOLHOS: [],
@@ -115,16 +130,14 @@ const submitMissingItems = async () => {
     CUSTOMIZADO: []
   }
 
-  // Organizar os itens por categoria
-  // example of item: {id: '01fc3f66-6178-4f31-9c51-d041e263a1d4', name: 'Colorau 90g', quantity: 13, category: 'Alimentos'}
-
+  // Organiza os itens por categoria
   missingItems.value.forEach(item => {
     console.log(item)
     const foodName = item.name
     const itemCount = item.quantity
     const category = item.category
 
-    // Determinar a categoria do item adicionado
+    // Mapeia a categoria do item para a estrutura categorizada
     const categoryMap = {
       'Alimentos': 'NATURAIS',
       'Molhos': 'MOLHOS',
@@ -137,12 +150,12 @@ const submitMissingItems = async () => {
     categorizedItems[categoryKey].push({ name: foodName, count: itemCount });
   })
 
-  // Ordenar os itens dentro de cada categoria por nome
+  // Ordena os itens dentro de cada categoria por nome
   Object.keys(categorizedItems).forEach(category => {
     categorizedItems[category].sort((a, b) => a.name.localeCompare(b.name))
   })
 
-  // Construir o conteúdo do email categorizado
+  // Constrói o conteúdo do email categorizado
   let emailContent = Object.entries(categorizedItems)
     .filter(([, items]) => items.length > 0)
     .map(([category, items]) => {
@@ -151,12 +164,12 @@ const submitMissingItems = async () => {
     })
     .join('')
 
-  // Adicionar observação se houver
+  // Adiciona observação se houver
   if (observation.trim() !== '') {
     emailContent += `\nObservação:\n${observation}`
   }
 
-  // Criar um formulário e enviar os dados
+  // Cria um formulário e envia os dados
   const form = document.createElement('form')
   form.action = 'https://formspree.io/f/mvgppjvj'
   form.method = 'POST'
@@ -188,5 +201,5 @@ const submitMissingItems = async () => {
 </script>
 
 <style>
-/* Add your styles here */
+/* Adicione seus estilos aqui */
 </style>
