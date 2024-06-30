@@ -22,7 +22,7 @@
         <Panel id="missingItemsModal" v-model:visible="showMissingItemsModal">
           <div v-for="category in listofitems" :key="category.id">
             <h2 class="text-xl dark:text-white text-black">
-              {{ category.category_name }}
+              {{ missingItems.filter(i => i.category === category.category_name).length > 0 ? category.category_name : '' }}
             </h2>
             <div v-for="item in missingItems.filter(i => i.category === category.category_name)" :key="item.id" 
               class="shadow-sm backdrop-blur-none mb-2 shadow-smp-2 flex-row">
