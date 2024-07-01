@@ -12,7 +12,7 @@ export default defineNuxtConfig({
 			exclude: ["Editor", "Chart"],
 		},
 	},
-	css: ["~/assets/css/tailwind.css", "primeicons/primeicons.css"],
+	css: ["./assets/css/tailwind.css", "primeicons/primeicons.css"],
 	postcss: {
 		plugins: {
 			tailwindcss: {},

@@ -43,9 +43,9 @@
                   <Button class="bg-red-600 w-8 h-8 text-nowrap text-base ml-1 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, -1)"
                     label="- 1" />
                   <InputNumber inputClass="w-12 mx-auto text-center p-0" class="ml-2" v-model="item.quantity" />
-                  <Button class="bg-green-600 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 1)"
+                  <Button class="bg-lime-400 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 1)"
                     label="+ 1" />
-                  <Button class="bg-green-600 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 6)"
+                  <Button class="bg-lime-400 w-8 h-8 text-nowrap text-base ml-2 sm:w-4 sm:h-4" @click="changeItemQuantity(item.id, 6)"
                     label="+ 6" />
                   <Button icon="pi pi-trash" class="ml-2 w-8 h-8 text-nowrap text-base bg-black sm:w-4 sm:h-4"
                     @click="removeItem(item.id)" />
