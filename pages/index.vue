@@ -69,9 +69,9 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref } from 'vue' // Importa a função ref do Vue para criar referências reativas
+//TODO, separra em modulos
 import items from '~/database/items.js' // Importa os itens de um arquivo JSON
 
 // Cria uma lista de itens, incluindo uma categoria customizada
